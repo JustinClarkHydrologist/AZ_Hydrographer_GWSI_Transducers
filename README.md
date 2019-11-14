@@ -18,7 +18,7 @@ Contributors: James Dieckhoff
 -Pandas and matplotlib are the primary libraries used for this program.
 
 
-This tool was designed for use by Arizona Department of Water Resources (ADWR) Groundwater Flow 
+Designed for use by Arizona Department of Water Resources (ADWR) Groundwater Flow 
 and Transport Modelers to Process the input data for MODFLOW Models and PEST Calibration Runs.
 
    Approximate Run Time = 9 minutes 51.4 sec on a computer with these specs:
