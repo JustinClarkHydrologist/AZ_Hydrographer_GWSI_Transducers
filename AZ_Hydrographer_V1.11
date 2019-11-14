@@ -1,0 +1,160 @@
+"""     Python GWSI Water Levels Grapher  -  VERSION 1.11
+             Started on 6/04/2019
+             Last Updated 11/14/2019 (November 14 2019, I am American)
+
+@author: Justin A. Clark
+
+This program takes data from an excel file and a text file and creates graphs that stand alone as PNG files.
+   The excel files contain water level data and well construction data from wells in ADWRs GWSI database.
+   The PNG files generated are saved to the main "Path" Folder.
+   This program includes a loop to make all the PNG files.
+   This version (version 1.11) is a clean version that just makes PNG files, does not use Seaborn.
+   matplotlib and Pandas are the primary libraries.
+
+This tool was designed for use by Arizona Department of Water Resources (ADWR) Groundwater Flow 
+and Transport Modelers to Process the input data for MODFLOW Models and PEST Calibration Runs.
+
+Approximate Run Time = 9 minutes 51.4 sec      (HP Z240 Tower Workstation
+                                               Intel I7-7700, 16 GB Ram
+                                               Windows 10 Enterprise)
+"""
+import pandas as pd
+import matplotlib.pyplot as plt
+import os, xlsxwriter
+from matplotlib.dates import DateFormatter
+from matplotlib.dates import YearLocator
+
+#
+#Find Kernel's Current Directory, set to desired location if necessary
+cwd = os.getcwd()
+Path = r"E:\MyPy\Data\General\Combiner\SpeedTest"
+os.chdir(Path)
+cwd = os.getcwd()
+
+#
+## Set variables for the filenames
+filename1 = "E:\GIS\ADWR\GWSI_ZIP\Data_Tables\GWSI_TRANSDUCER_LEVELS.txt"
+filename2 = "E:\GIS\ADWR\GWSI_ZIP\Data_Tables\GWSI_SITES.xlsx"
+filename3 = "E:\GIS\ADWR\GWSI_ZIP\Data_Tables\TucsonAMA_Errors_Nov2019.csv"
+
+#
+## Define a list of column names based on GWSI Protocol, to be used reading first txt file
+###THIS IS STILL VERY SLOPPY AND SHOULD BE PROGRAMMED USING DATA EXTRACTION, NOT HARD CODED
+ColNames = ["WELL_SITE_ID","ID","Date","DEPTH_TO_WATER","WATER_LEVEL_ELEVATION","SOURCE_CODE","METHOD_CODE","REMARK_CODE","TEMPERATURE","BATTERY_VOLTAGE"]
+
+#
+## Create a Pandas DataFrame with Water Level Elevations Extracted From Wells with High Frequency Data (Transducers)
+df = pd.read_csv(filename1, delimiter = ",", engine = 'python', names=ColNames, index_col = False)
+
+#
+## DROP DTW ENTRIES THAT PROBABLY HAVE ERRORS (For Now Only 4 wells in TAMA)
+dfDrop = pd.read_csv(filename3, delimiter = ",", engine = 'python', index_col =False)
+indexNames = dfDrop['ID'].index
+
+#
+## Create a Pandas DataFrame with Well Construction Data
+df2 = pd.read_excel(filename2, index_col = None)
+
+#
+##Change the name of a Well ID column in df2 to match df
+col_start = "SITE_WELL_SITE_ID"
+col = ColNames[0]
+df2 = df2.rename(columns={col_start:col})
+
+#
+## Set Bottom Elevation
+df2['WELL_BOT'] = df2['SITE_WELL_ALTITUDE'] - df2['SITE_WELL_DEPTH']
+
+#
+##GET A LIST OF UNIQUE WELLS
+wells = list(set(df[col]))
+
+#
+## Get a list of columns in the initial DataFrame
+df4 = df2.loc[df2[col] == set(df[col])]
+
+for location in wells:
+     ##THIS FIRST SECTION MAKES THE WELL SPECIFIC DATAFRAME AND ADDS a new 'Rise' column
+     df3 = df.loc[df[col] == location].copy()
+###     df3 = df.loc[df[col] == location] ##WARNING POPPED UP
+###     df3 = df.loc[df[col] == location, :]
+     ###THE NEXT STEP COULD PROBABLY BE DONE BY RE-INDEXING "df3.Date"
+     df3['UpDate'] = pd.to_datetime(df3.Date)
+     df3 = df3.sort_values('UpDate')
+     
+     ##THIS METHOD GIVES A WARNING, FIX LATER
+     elev = df2[df2[col]==location]['SITE_WELL_ALTITUDE']
+     df3['LSE'] = elev.iloc[0]
+     
+     bottom = df2[df2[col]==location]['WELL_BOT']
+     df3['Bottom'] = bottom.iloc[0]
+     
+     depth = df2[df2[col]==location]['SITE_WELL_DEPTH']
+     df3['Depth'] = depth.iloc[0]
+     
+     RegNo = df2[df2[col]==location]['SITE_WELL_REG_ID']
+     df3['Reg_No'] = RegNo.iloc[0]
+     RegNo = df3.Reg_No.iloc[0]
+
+     min_hd_float = df3['WATER_LEVEL_ELEVATION'].min()
+     df3['Rise'] = df3['WATER_LEVEL_ELEVATION'] - min_hd_float
+
+     ## This is a sloppy way to avoid errors, should add individual replacers above
+     df3.fillna(value = 0, inplace = True)
+
+     #
+     ## THIS SECTION DEFINES AXES MIN/MAX
+     min_date_str = df3['UpDate'].min()
+     min_date_datetime = pd.to_datetime(min_date_str)
+
+     min_date_datetime = df3['UpDate'].min() - pd.DateOffset(years = 1)
+
+     max_date_str = df3['UpDate'].max()
+     max_date_datetime = pd.to_datetime(max_date_str)
+
+     #
+     ## DELETE THESE ROW INDEXES FROM DataFrame3
+     cond = df3['ID'].isin(dfDrop['ID']) == True
+     df3.drop(df3[cond].index, inplace = True)
+
+     plt.xlabel("Date")
+     xrange = pd.date_range(min_date_datetime, end=max_date_datetime, freq='A')
+     plt.rcParams['xtick.labelsize']=8
+
+     x = df3['UpDate']
+     y1 = df3['DEPTH_TO_WATER']
+     y2 = df3['WATER_LEVEL_ELEVATION']
+
+     fig = plt.figure()
+     ax1 = fig.add_subplot(111)
+
+     ax1.plot(x, y1)
+     ax1.set_ylabel("Depth to Water [ft bgs]")
+     plt.gca().invert_yaxis()
+
+     ax2 = ax1.twinx()
+     ax2.plot(x, y2, 'b-')
+     ax2.set_ylabel("Water Level Elevation [ft amsl]", color='g')
+
+     for tl in ax2.get_yticklabels():
+          tl.set_color('g')
+
+     fig.suptitle('GWSI Site: ' + str(location) + ', RegID: 55-' + str(int(df3["Reg_No"].iloc[0])) + ', Depth: ' + str(int(df3["Depth"].iloc[0]))+ ' ft', fontsize=12)
+
+     ax1.grid(b=True, which='major', color='#666666', linestyle='-')
+
+     myFmt = DateFormatter("%Y")
+     ax1.xaxis.set_major_formatter(myFmt)
+     years = YearLocator()
+     ax1.xaxis.set_major_locator(YearLocator())
+     ax1.format_xdata = DateFormatter('%Y-%m-%d')
+     
+     for tick in ax1.get_xticklabels():
+          tick.set_rotation(90)
+
+     plt.rcParams.update({'font.size': 12})
+
+     plt.show()
+
+     outname = str('Hydrographs_GWSI_') + str(location) + str('__Transducer.png')
+     fig.savefig(outname, dpi = 400, bbox_inches='tight', pad_inches=.1)
