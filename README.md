@@ -2,6 +2,7 @@
 Hydrograph Maker for GWSI Data Collected from Automated Sites (Transducers or Stevens Recorders).
 
 Program Author: Justin Clark
+
 Contributors: James Dieckhoff
 
 -This program takes data from an excel file and a text file and creates graphs that stand alone as PNG files.
