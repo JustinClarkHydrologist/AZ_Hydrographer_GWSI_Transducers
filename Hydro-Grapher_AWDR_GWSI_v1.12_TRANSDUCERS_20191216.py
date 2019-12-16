@@ -11,15 +11,18 @@ This program takes data from an excel file and a text file and creates graphs th
    The PNG files generated are saved to the current working drive (path is not defined).
    This program includes a for loop to make all the PNG files.
    This version (version 1.12) is a clean version that just makes basic PNG files, does not use Seaborn.
-   Pandas and matplotlib are the primary libraries used.\
+   Pandas and matplotlib are the primary libraries used.
    ~60 Lines of active code are used (the rest is just comments and blank lines).
 
 This tool was designed for use by Arizona Department of Water Resources (ADWR) Groundwater Flow 
 and Transport Modelers to Process the input data for MODFLOW Models and PEST Calibration Runs.
 
-Approximate Run Time = 1 Hours 2 minutes       (HP Z240 Tower Workstation
-                                                Intel I7-7700, 16 GB Ram
-                                                Windows 10 Enterprise)
+All data referenced can be downloaded here:
+https://new.azwater.gov/sites/default/files/GWSI_ZIP_10182019.zip
+
+Approximate Run Time = 59 minutes       (HP Z240 Tower Workstation
+                                        Intel I7-7700, 16 GB Ram
+                                        Windows 10 Enterprise)
 """
 import pandas as pd
 import matplotlib.pyplot as plt
