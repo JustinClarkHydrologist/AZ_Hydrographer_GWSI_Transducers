@@ -40,7 +40,6 @@ ColNames = ["WELL_SITE_ID","ID","Date","DEPTH_TO_WATER","WATER_LEVEL_ELEVATION",
 
 ## CREATE A PANDAS DataFrame WITH OBSERVATIONS From AUTOMATICALLY COLLECTED Depth to Water Measurements Extracted From Wells with High Frequency Data Collectors (Transducers). Data From GWSI Wells in Arizona.
 df = pd.read_csv(filename1, delimiter = ",", engine = 'python', names=ColNames, index_col = False)
-df['Date'] = pd.to_datetime(df['Date'])
 
 ## Create a Pandas DataFrame with Well Construction Data
 df2 = pd.read_excel(filename2, index_col = None)
