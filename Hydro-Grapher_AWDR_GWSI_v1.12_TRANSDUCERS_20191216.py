@@ -140,7 +140,7 @@ def figure_proc(location):
     fig.savefig(outname, dpi=400, bbox_inches='tight', pad_inches=.1)
 
 
-with Pool(cpu_count()) as pool:
+with Pool(cpu_count() / 2) as pool:
     pool.map(figure_proc, wells)
     pool.join()
 
