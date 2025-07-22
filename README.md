@@ -13,22 +13,18 @@ Contributors: James Dieckhoff and Michael T. Giansiracusa
 
 -This program includes a for loop to make all the PNG files.
 
--This version (version 1.12) is a clean version that just makes PNG files, does not use Seaborn.
+-This version (version 1.2) is a clean version that just makes PNG files, does not use Seaborn.
 
 -Pandas and matplotlib are the primary libraries used for this program.
 
 
-Designed for use by Arizona Department of Water Resources (ADWR) Groundwater Flow 
-and Transport Modelers to Process the input data for MODFLOW Models and PEST Calibration Runs.
-
-
 All data referenced can be downloaded here:
-https://new.azwater.gov/sites/default/files/GWSI_ZIP_10182019.zip
 
+https://www.azwater.gov/sites/default/files/zip/GWSI_ZIP_20250714.zip
 
-Approximate Run Time = 59 minutes 
+Approximate Run Time = 59 minutes for the entire state of Arizona
 
 Computer with these specs:
-HP Z240 Tower Workstation
-Intel I7-7700, 16 GB Ram
-Windows 10 Enterprise
+Lenovo Ideapad
+AMD Ryzen 5 4500U, 16 GB Ram
+Windows 10 Home
